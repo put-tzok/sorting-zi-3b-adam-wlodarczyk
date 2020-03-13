@@ -1,11 +1,8 @@
 #include <assert.h>
-    #include <stdio.h>
-    //#include <stdlib.h>
-    #include <time.h>
-
-
-    #define NDEBUG 1
-    unsigned int ns[] = { 100, 200, 300, 400, 500, 600, 700, 800,900,1000};
+#include <stdio.h>
+#include <time.h>
+#define NDEBUG 1
+    unsigned int ns[] = { 1000, 900, 800, 700, 600, 500, 400, 300,200,100};
 
 
     int random(int min, int max){
@@ -39,30 +36,41 @@
     }
 
     void fill_decreasing(int *t, unsigned int n) {
-       for(int i = n; i>n; i--) {t[i] = 2*i;}
+        int j=0;
+       for(int i = n-1; i>=0; i--) {t[i] = j++;}
     }
 
     void fill_vshape(int *t, unsigned int n) {
-        for(int i = 0; i<n/2; i++) {t[i] = 2*i;}
-        for(int i = n; i>n/2; i--) {t[i] = 2*i;}
+            int j=n/2;
+        for(int i = 0; i<n/2; i++) {
+                t[i] = 2*--j;
+        }
+        for(int i = n/2; i<=n-1; i++) {
+                t[i] = 2*j++;
+        }
     }
+
+int argmin(int A[], int begin, int end ){
+    int argmin;
+    argmin = begin;
+    for (int i= begin ; i<=end; i++){
+         if (A[i] < A[argmin]){
+            argmin = i;
+        }
+    }
+    return argmin;
+}
 
     void selection_sort(int *t, unsigned int n) {
-    int i, j, min_idx;
-        // One by one move boundary of unsorted subarray
-        for (i = 0; i < n-1; i++)
-        {
-            // Find the minimum element in unsorted array
-            min_idx = i;
-            for (j = i+1; j < n; j++)
-              if (&t[j] < &t[min_idx])
-                min_idx = j;
-
-            // Swap the found minimum element with the first element
-            swap(&t[min_idx], &t[i]);
-            }
+        int j;
+      for (int i = 0; i<n; i++){
+        j = argmin(t, i, n-1 );
+        swap1(t,i,j);
+      }
 
     }
+
+
 
     void insertion_sort(int *t, unsigned int n) {
 
@@ -113,68 +121,43 @@
        quick_sort2(t, 0, n - 1);
     }
 
-void heap_up(int heap[],int index);
-void heap_down(int heap[],int index,int size);
+    void heapify(int arr[], int n, int i)
+    {
+        int largest = i; // Initialize largest as root
+        int l = 2*i + 1; // left = 2*i + 1
+        int r = 2*i + 2; // right = 2*i + 2
 
-void heap_up(int heap[],int index);
-    void heap_add(int heap[], int size ,int v){
-        heap[size] = v ;
-        heap_up(heap, size);
-        size = size + 1;
-    }
+        if (l < n && arr[l] > arr[largest])
+            largest = l;
 
+        if (r < n && arr[r] > arr[largest])
+            largest = r;
 
-void heap_up(int heap[],int index){
-    int parent;
-    if (index > 0){
-            parent = ((index - 1) / 2);
-        if (heap[index] < heap[parent]){
-            swap1(heap, index, parent);
-            heap_up(heap, parent);
+        if (largest != i)
+        {
+            int swap = arr[i];
+            arr[i] = arr[largest];
+            arr[largest] = swap;
+
+            heapify(arr, n, largest);
         }
     }
-}
-int heap_poll(int heap[],int size){
-    int v = heap[0];
-    size = size - 1;
-    heap[0] = heap[size];
-    heap_down(heap, 0, size);
-    return v;
-}
-void heap_down(int heap[],int index,int size){
-    int l,r,argmin;
-    l = index*2 + 1;
-    r = index*2 + 2;
-    if (l >= size){
-        return;
-    }
-    
-    if (r >= size || heap[l] < heap[r]){
-          argmin = l;      
-            }else{
-             argmin = r;
-            }
-    
-
-    if (heap[argmin] < heap[index]){
-        swap1(heap, argmin, index);
-        heap_down(heap, argmin, size);
-    }
-
-}
 
     void heap_sort(int *t, unsigned int n) {
-       int size = 0;
-       int heap[size];
+          for (int i = n / 2 - 1; i >= 0; i--)
+            heapify(t, n, i);
 
-    for (int i=0; i<n;i++){
-        heap_add(heap, size, t[i]);
+        for (int i=n-1; i>=0; i--)
+        {
+            int temp = t[0];
+            t[0] = t[i];
+            t[i] = temp;
+
+            heapify(t, i, 0);
+        }
     }
 
-    for (int j=0; j<n;j++){
-        t[j] = heap_poll(heap, size);
-    }
-    }
+
 
     void fill_random(int *t, unsigned int n) {
         for (unsigned int i = 0; i < n; i++) {
@@ -188,31 +171,31 @@ void heap_down(int heap[],int index,int size){
 
     void is_increasing(int *t, unsigned int n) {
         for (unsigned int i = 1; i < n; i++) {
-           // assert(t[i] > t[i - 1]);
+           assert(t[i] > t[i - 1]);
         }
     }
 
     void is_decreasing(int *t, unsigned int n) {
         for (unsigned int i = 1; i < n; i++) {
-         //   assert(t[i] < t[i - 1]);
+          assert(t[i] < t[i - 1]);
         }
     }
 
     void is_vshape(int *t, unsigned int n) {
         int *begin = t;
-        int *end = t + n - 1;
 
+        int *end = t + n - 1;
         while (end - begin > 1) {
-          //  assert(*begin > *end);
+           //assert(*begin > *end);
             begin++;
-          //  assert(*end > *begin);
+           assert(*end > *begin);
             end--;
         }
     }
 
     void is_sorted(int *t, unsigned int n) {
         for (unsigned int i = 1; i < n; i++) {
-         //   assert(t[i] >= t[i - 1]);
+            assert(t[i] >= t[i - 1]);
         }
     }
 
